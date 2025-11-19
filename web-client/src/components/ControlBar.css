@@ -1,0 +1,81 @@
+.control-bar {
+  padding: 16px 24px;
+  background: #2a2a2a;
+  border-top: 1px solid #3a3a3a;
+  display: flex;
+  justify-content: center;
+}
+
+.controls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.control-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 20px;
+  background: #3a3a3a;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: 80px;
+}
+
+.control-button:hover {
+  background: #4a4a4a;
+  transform: translateY(-2px);
+}
+
+.control-button .icon {
+  font-size: 24px;
+}
+
+.control-button .label {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.control-button.inactive {
+  background: #d32f2f;
+}
+
+.control-button.inactive:hover {
+  background: #b71c1c;
+}
+
+.control-button.active {
+  background: #1976d2;
+}
+
+.control-button.active:hover {
+  background: #1565c0;
+}
+
+.leave-button {
+  background: #d32f2f;
+}
+
+.leave-button:hover {
+  background: #b71c1c;
+}
+
+@media (max-width: 768px) {
+  .controls {
+    gap: 8px;
+  }
+  
+  .control-button {
+    padding: 10px 16px;
+    min-width: 70px;
+  }
+  
+  .control-button .icon {
+    font-size: 20px;
+  }
+}
