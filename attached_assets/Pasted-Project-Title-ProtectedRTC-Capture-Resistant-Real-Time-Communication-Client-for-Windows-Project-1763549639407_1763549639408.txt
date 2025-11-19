@@ -1,0 +1,200 @@
+Project Title
+ProtectedRTC: Capture-Resistant Real-Time Communication Client for Windows
+
+Project Overview
+Build a Windows desktop application that works like a lightweight Discord/Meet client (voice, video, screen sharing), but with a critical twist:
+The entire communication UI (video, remote screen, movie playback, etc.) is visible to you, but is invisible to other apps’ screen sharing and screen recording, even when you share your entire screen in tools like Google Meet, Microsoft Teams, or Zoom.
+The app should act as:
+A real-time communication client (WebRTC-based) for:
+1:1 or small-group calls
+Audio + video + screen sharing
+A protected viewer:
+The call window is fully functional for the local user
+But the OS is instructed to exclude this window from screen-capture APIs, so external apps cannot capture it.
+Target OS: Windows 10/11 (64-bit)
+
+Problem Statement
+In remote work, online exams, interviews, and monitored environments, users are often forced to share their entire screen through corporate tools (Google Meet, Teams, etc.), sometimes with monitoring software ensuring that the user is genuinely sharing the real desktop, not a fake one.
+Standard tools like Discord or other RTC apps:
+Are fully visible on the screen
+And therefore fully visible in any “Share Entire Screen” session
+There is no way to keep a live private call, movie, or shared screen visible only to yourself while still complying with “share entire screen” requirements.
+ProtectedRTC solves this by:
+Implementing a full RTC client (mic, cam, screen sharing)
+Wrapping it in a Windows desktop shell that is explicitly excluded from OS-level screen capture
+Using official Windows APIs to ensure:
+You can see everything
+Other apps and screen recorders get a sanitized version with the ProtectedRTC window hidden or blacked out
+
+Core Objectives
+Real-Time Communication
+Support 1:1 calls with:
+Audio (mic on/off)
+Video (camera on/off, camera device selection)
+Screen sharing (choice of display or window)
+Show remote participants’ video and screen streams in a tiled layout.
+Capture Protection
+The main application window must:
+Be visible on the physical monitor.
+Be excluded from all standard screen and window capture APIs.
+When the user shares their entire screen using an external tool (Meet/Teams/Zoom), the ProtectedRTC window should:
+Appear black, blank, or omitted to remote viewers.
+Still be fully functional locally.
+Device & Source Selection
+Allow user to:
+Select microphone input device.
+Select camera device.
+Select audio output device (if feasible).
+Select screen or application window for screen sharing inside ProtectedRTC.
+Usable UI
+Clear, modern, minimal UI that provides:
+Room join flow (room ID or invite link).
+Controls bar: Mic toggle, Cam toggle, Screen Share toggle, Leave call.
+Visual indicators for:
+Connection status (Connected/Disconnected).
+Media status (Mic muted, Cam off, Screen sharing on).
+Protection status (Capture Protection ON).
+
+High-Level Architecture
+1. Desktop Client (Windows Shell)
+Tech: C# (.NET 8), WPF (or WinUI 3), WebView2
+Responsibilities:
+Create the main application window.
+Apply OS-level capture exclusion using SetWindowDisplayAffinity with WDA_EXCLUDEFROMCAPTURE on its own window handle.
+Host a WebView2 instance that renders the WebRTC-based web client.
+Provide status UI elements (e.g., “Protected: ON”, connection icon, etc.).
+Key behavior:
+On window creation / loaded:
+Retrieve HWND of the WPF window.
+Call SetWindowDisplayAffinity(hwnd, WDA_EXCLUDEFROMCAPTURE).
+Optionally verify the applied flag and show a visual state (Protected: ON / OFF).
+The WebRTC UI runs inside WebView2 and is thus visually part of this protected window.
+
+2. WebRTC Frontend (Web Client)
+Tech:
+React / Vue / plain JS with TypeScript preferred
+Bundler: Vite / Webpack
+Runs inside:
+WebView2 (embedded in the desktop client)
+Optionally in a regular browser for debugging
+Responsibilities:
+UI/UX for RTC:
+Room join screen: enter room ID / username.
+In-call UI:
+Local video preview.
+Remote video tiles.
+Screen share preview indicator.
+Mute/unmute mic.
+Enable/disable camera.
+Start/stop screen share.
+WebRTC engine:
+Use getUserMedia() to capture mic/cam.
+Use getDisplayMedia() to capture screen/windows inside ProtectedRTC.
+Create and manage RTCPeerConnection.
+Handle ICE candidates, SDP offers/answers.
+Send signaling messages over WebSockets (via signaling server).
+Render media streams in <video> elements.
+
+3. Signaling Server (Backend)
+Tech: Node.js + TypeScript (or JS) with WebSocket/Socket.IO
+Responsibilities:
+Manage rooms and participants.
+Handle signaling messages:
+join-room, leave-room
+offer, answer
+ice-candidate
+Keep track of:
+Which peers are in which room.
+Which peers need to receive which signaling events.
+Configuration for STUN/TURN servers (for NAT traversal).
+This server does not handle the media itself; it only coordinates peers. Media flows peer-to-peer via WebRTC (or via TURN relay when necessary).
+
+Key Features & Requirements (Detailed)
+Functional Requirements
+User Authentication (Optional for MVP)
+Simple identity (display name or random ID).
+Room-based join (room ID or auto-generated link).
+Media Controls
+Toggle mic (mute/unmute).
+Toggle cam (start/stop).
+Start/stop screen share.
+Switch between cameras (if multiple).
+Visual indicators for mute/cam-off per participant.
+Screen Sharing
+Allow user to pick:
+Entire screen.
+Specific window (where supported).
+Show local preview or at least status (e.g., “Sharing Screen: Screen 1”).
+Protected Window
+Entire UI (video tiles, shared screen, etc.) is rendered inside the WPF window.
+The WPF window:
+Calls SetWindowDisplayAffinity with WDA_EXCLUDEFROMCAPTURE.
+Verification:
+Users can test by:
+Taking a Snipping Tool screenshot.
+Using PrintScreen → Paint.
+Confirm that the ProtectedRTC area is black/hidden.
+Then test via Meet/Teams full-screen share.
+Connection Handling
+Show connection state:
+Connecting…
+Connected
+Reconnecting
+Disconnected
+Handle peer leaving gracefully (remove their tiles, show message).
+
+Non-Functional Requirements
+Performance
+Support at least:
+720p video.
+Screen sharing at 30 fps (where bandwidth allows).
+Efficient resource use on the client (no unnecessary CPU/GPU spikes).
+Reliability
+Handle temporary network issues:
+Reconnect to signaling server.
+Attempt reconnection/renegotiation of WebRTC sessions where feasible.
+Security
+Use secure WebSockets (wss) in production.
+Use secure STUN/TURN configuration.
+No logging of raw media; only minimal signaling metadata.
+Clearly separate “internal testing features” from production mode.
+User Experience
+Clean, minimal interface.
+Status labels like:
+“Protected: ON” or “Protected: FAILED – capture protection not supported”.
+Helpful error messages (e.g., if device access is blocked, permissions denied, etc.).
+
+Stretch Goals / Advanced Features
+If you want to push this to an even higher level:
+Multi-Participant Calls
+Support more than 2 users in a room.
+Use mesh WebRTC topology for small groups.
+Chat
+Text chat per room (data channel or WebSocket).
+Recording (Local)
+Allow local user only to record the incoming streams (within the protected app).
+Use MediaRecorder API for test/demo.
+End-to-End Encryption Controls
+Implement basic E2EE (SRTP/DTLS is built-in to WebRTC, but you can explore application-level encryption or keys).
+Settings Panel
+Persistent device preferences.
+Turn protection toggle ON/OFF (for debugging, though in production you’d keep it ON always).
+System Tray Integration
+Minimize ProtectedRTC to tray.
+Quick “Join Last Room” action.
+
+Deliverables
+Source Code Repository
+Full project with:
+desktop-client/ (WPF + WebView2 app with capture protection)
+web-client/ (WebRTC front-end)
+signaling-server/ (Node.js backend)
+Documentation
+README.md:
+Project overview
+Setup instructions
+Run instructions (dev + production)
+docs/:
+Architecture diagram
+WebRTC signaling flow
+Capture protection notes (with OS-specific behavior and limitations)
