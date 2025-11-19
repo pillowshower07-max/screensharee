@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { WebRTCService, ConnectionStatus, Participant } from './services/WebRTCService';
+import { WebRTCService, type ConnectionStatus, type Participant } from './services/WebRTCService';
 import JoinRoom from './components/JoinRoom';
 import CallInterface from './components/CallInterface';
 import './App.css';
@@ -19,7 +19,7 @@ function App() {
       setConnectionStatus(status);
     };
 
-    service.onParticipantJoined = (participant) => {
+    service.onParticipantJoined = () => {
       setParticipants(new Map(service.participants));
     };
 

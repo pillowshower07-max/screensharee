@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { WebRTCService, Participant } from '../services/WebRTCService';
+import { WebRTCService, type Participant } from '../services/WebRTCService';
 import VideoTile from './VideoTile';
 import ControlBar from './ControlBar';
 import './CallInterface.css';

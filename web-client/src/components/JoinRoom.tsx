@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ConnectionStatus } from '../services/WebRTCService';
+import type { ConnectionStatus } from '../services/WebRTCService';
 import './JoinRoom.css';
 
 interface JoinRoomProps {
