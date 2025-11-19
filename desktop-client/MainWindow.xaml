@@ -1,0 +1,67 @@
+<Window x:Class="ProtectedRTC.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
+        Title="ProtectedRTC - Capture-Resistant Video Calls" 
+        Height="720" 
+        Width="1280"
+        MinHeight="480"
+        MinWidth="800"
+        WindowStartupLocation="CenterScreen"
+        Loaded="Window_Loaded">
+    
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        
+        <Border Grid.Row="0" Background="#2a2a2a" Padding="12">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                
+                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                    <TextBlock Text="ProtectedRTC" 
+                               FontSize="16" 
+                               FontWeight="Bold" 
+                               Foreground="White" 
+                               VerticalAlignment="Center"
+                               Margin="0,0,16,0"/>
+                </StackPanel>
+                
+                <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Border x:Name="ProtectionStatusBadge"
+                            Background="#2d5016" 
+                            CornerRadius="4" 
+                            Padding="8,4"
+                            Margin="8,0,0,0">
+                        <TextBlock x:Name="ProtectionStatusText" 
+                                   Text="🔒 Protection: CHECKING..." 
+                                   Foreground="#90ee90" 
+                                   FontSize="12" 
+                                   FontWeight="SemiBold"/>
+                    </Border>
+                    
+                    <Button Content="⚙️" 
+                            Background="Transparent" 
+                            BorderThickness="0" 
+                            Foreground="White" 
+                            FontSize="16"
+                            Padding="8"
+                            Margin="8,0,0,0"
+                            Cursor="Hand"
+                            Click="SettingsButton_Click"
+                            ToolTip="Settings"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+        
+        <wv2:WebView2 x:Name="webView" 
+                      Grid.Row="1"
+                      Source="about:blank"/>
+    </Grid>
+</Window>
